@@ -29,7 +29,7 @@ func (s *Server) CreateServer(port string) (*Server, error) {
 	}, nil
 }
 
-func (s *Server) Start(handler func()) error {
+func (s *Server) Start(handler func(conn net.Conn)) error {
 	fmt.Printf("Server listening on %v", s.listener.Addr())
 
 	for {
@@ -39,7 +39,7 @@ func (s *Server) Start(handler func()) error {
 		}
 		defer conn.Close()
 
-		handler()
+		handler(conn)
 	}
 }
 
