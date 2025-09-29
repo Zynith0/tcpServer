@@ -12,12 +12,6 @@ type Server struct {
 	mutex sync.Mutex
 }
 
-// var (
-// 	clients = make(map[string]*Client)
-// 	mutex sync.Mutex
-// )
-
-
 func (s *Server) CreateServer(port string) (*Server, error) {
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
