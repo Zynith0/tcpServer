@@ -38,12 +38,12 @@ func HandleConnection(conn net.Conn) {
 	clients[c.ID] = c
 	mutex.Unlock()
 
-	defer func() {
-		mutex.Lock()
-		delete(clients, c.ID)
-		mutex.Unlock()
-		conn.Close()
-	}()
+	// defer func() {
+	// 	mutex.Lock()
+	// 	delete(clients, c.ID)
+	// 	mutex.Unlock()
+	// 	conn.Close()
+	// }()
 }
 
 func Broadcast(message []byte) {
