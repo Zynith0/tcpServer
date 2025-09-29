@@ -34,6 +34,8 @@ func HandleConnection(conn net.Conn) {
 		Conn: conn,
 	}
 
+	fmt.Printf("Client %v has connected", c.ID)
+
 	mutex.Lock()
 	clients[c.ID] = c
 	mutex.Unlock()
