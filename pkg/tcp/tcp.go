@@ -55,7 +55,7 @@ func Broadcast(message []byte) {
 	for _, client := range clients {
 		_, err := client.Conn.Write(message)
 		if err != nil {
-			fmt.Println("skill issue", err)
+			fmt.Printf("Client %v has disconnected", client.Conn.LocalAddr().String())
 		}
 	}
 }
