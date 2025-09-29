@@ -20,7 +20,7 @@ var (
 
 func Server(port string) (net.Listener, error) {
 	listener, err := net.Listen("tcp", port)
-	fmt.Printf("Server listening on %v", listener.Addr())
+	fmt.Printf("Server listening on %v\n", listener.Addr())
 	return listener, err
 }
 
@@ -34,7 +34,7 @@ func HandleConnection(conn net.Conn) {
 		Conn: conn,
 	}
 
-	fmt.Printf("Client %v has connected", c.ID)
+	fmt.Printf("Client %v has connected\n", c.ID)
 
 	mutex.Lock()
 	clients[c.ID] = c
