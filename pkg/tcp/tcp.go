@@ -6,54 +6,73 @@ import (
 	"sync"
 )
 
-type Client struct {
-	ID string
-	Conn net.Conn
-	Username string
+type Server struct {
+	listener net.Listener
+	clients map[net.Addr]net.Conn
+	mutex sync.Mutex
 }
 
-var (
-	clients = make(map[string]*Client)
-	mutex sync.Mutex
-)
+// var (
+// 	clients = make(map[string]*Client)
+// 	mutex sync.Mutex
+// )
 
 
-func Server(port string) (net.Listener, error) {
+func (s *Server) CreateServer(port string) (*Server, error) {
 	listener, err := net.Listen("tcp", port)
-	fmt.Printf("Server listening on %v", listener.Addr())
-	return listener, err
+	if err != nil {
+		return nil, err
+	}
+	return &Server{
+		listener: listener,
+		clients: make(map[net.Addr]net.Conn),
+	}, nil
+}
+
+func (s *Server) Start(handler func()) error {
+	fmt.Printf("Server listening on %v", s.listener.Addr())
+
+	for {
+		conn, err := s.listener.Accept()
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+
+		handler()
+	}
 }
 
 func Echo(conn net.Conn, message []byte) {
 	conn.Write(message)
 }
 
-func HandleConnection(conn net.Conn) {
-	c := &Client{
-		ID: conn.RemoteAddr().String(),
-		Conn: conn,
-	}
+// func HandleConnection(conn net.Conn) {
+// 	c := &Client{
+// 		ID: conn.RemoteAddr().String(),
+// 		Conn: conn,
+// 	}
+//
+// 	fmt.Printf("Client %v has connected", c.ID)
+//
+// 	mutex.Lock()
+// 	clients[c.ID] = c
+// 	mutex.Unlock()
+//
+// 	// defer func() {
+// 	// 	mutex.Lock()
+// 	// 	delete(clients, c.ID)
+// 	// 	mutex.Unlock()
+// 	// 	conn.Close()
+// 	// }()
+// }
 
-	fmt.Printf("Client %v has connected", c.ID)
+func (s *Server) Broadcast(message []byte) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	mutex.Lock()
-	clients[c.ID] = c
-	mutex.Unlock()
-
-	// defer func() {
-	// 	mutex.Lock()
-	// 	delete(clients, c.ID)
-	// 	mutex.Unlock()
-	// 	conn.Close()
-	// }()
-}
-
-func Broadcast(message []byte) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	for _, client := range clients {
-		_, err := client.Conn.Write(message)
+	for _, client := range s.clients {
+		_, err := client.Write(message)
 		if err != nil {
 			fmt.Println("skill issue", err)
 		}
